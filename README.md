@@ -18,8 +18,12 @@ font="sans serif"
 
 si desean cambiar tipo de letras fondos y otros diseños 
 
-
-
 para correr la app se debe escribir 
 streamlit run app.py 
+
+
+https://github.com/user-attachments/assets/7548211b-4673-4bff-ad02-5952e2a4e57e
+
+
+
 
