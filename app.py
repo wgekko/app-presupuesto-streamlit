@@ -145,6 +145,7 @@ st.write("---")
 
 # NUEVA SECCIÓN: Gastos por pagar hasta fin de mes actual
 st.subheader(f"📆 Gastos Pendientes Próximos Periodos por Pagar de {meses_nombres[parMes]} ")    
+st.warning("importante el detalle de los gastos pendientes para el próximo periodo siempre lo hace desde la fecha actual, en adelante si de decide cambiar el mes a desplegar, la proyeccion de gastos a pagar por semana o mensual no cambia")
 # Convertir 'fecha' a datetime
 dfDatos['fecha'] = pd.to_datetime(dfDatos['fecha'], errors='coerce')
 # Normalizamos campos clave
