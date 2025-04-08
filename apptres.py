@@ -7,6 +7,8 @@ from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode # Librería par
 from datetime import datetime, timedelta
 import base64
 import streamlit.components.v1 as components
+from streamlit.components.v1 import html
+from ipyvizzu import Chart, Data, Config, DisplayTarget,  Style  
 import warnings
 warnings.simplefilter("ignore", category=FutureWarning)
 # Suprimir advertencias ValueWarning
@@ -101,6 +103,79 @@ gastos_promedio = dfDatos.groupby('mes')['gastos'].sum().mean()
 
 # Título con nombre del mes en lugar del número
 st.header(f'Tablero de control de gastos - Proyecto Inmobiliario 2025')
+
+# Cargar datos
+df = pd.read_excel("datos/gastos.xlsx")
+
+# Preprocesamiento
+df['fecha'] = pd.to_datetime(df['fecha'])
+df['mes'] = df['fecha'].dt.strftime('%m/%Y')
+
+# Filtros dinámicos en la barra lateral
+# --- Controles en barra lateral ---
+st.sidebar.header("Filtros para gráfico animado")
+proyecto_seleccionado = st.sidebar.selectbox("Selecciona un proyecto", df['proyecto'].unique())
+modo_comparacion = st.sidebar.radio("Comparar por:", ['estado', 'detalle'])
+mostrar_acumulado = st.sidebar.checkbox("Mostrar totales acumulados", value=False)
+
+# --- Filtrado y agrupación ---
+df = df[df['proyecto'] == proyecto_seleccionado]
+columna_comparacion = modo_comparacion
+agrupado = df.groupby(['mes', 'unidad', columna_comparacion], as_index=False)['gastos'].sum()
+
+if mostrar_acumulado:
+    agrupado['gastos'] = agrupado.sort_values('mes').groupby(['unidad', columna_comparacion])['gastos'].cumsum()
+
+# Renombrar columnas para ipyvizzu
+agrupado.columns = ['Mes', 'Unidad', 'Comparacion', 'Gastos']
+
+# --- Crear gráfico animado ---
+def create_chart():
+    chart = Chart(width="800px", height="600px", display=DisplayTarget.MANUAL)
+    data = Data()
+    data.add_df(agrupado)
+    chart.animate(data)
+
+    # Configuración inicial
+    chart.animate(
+        Config({
+            "x": "Unidad",
+            "y": "Gastos",
+            "label": "Gastos",
+            "color": "Comparacion",
+            "title": f"Gastos por Unidad ({modo_comparacion})"
+        })
+    )
+
+    chart.feature("tooltip", True)
+
+    # Animación por cada mes
+    for mes in sorted(agrupado['Mes'].unique()):
+        chart.animate(
+            Data.filter(f'record.Mes == "{mes}"')
+        )
+        chart.animate(
+            Config({
+                "x": "Unidad",
+                "y": "Gastos",
+                "label": "Comparacion",
+                "color": "Comparacion",
+                "geometry": "rectangle",
+                "split": True,
+                "title": f"Gastos - Mes: {mes}"
+            })
+        )
+
+    return chart._repr_html_()
+
+# --- Mostrar en Streamlit ---
+st.title("Visualización Animada de Gastos")
+st.subheader(f"Proyecto seleccionado: {proyecto_seleccionado}")
+CHART = create_chart()
+html(CHART, width=950, height=700)
+
+st.warning("---")
+
         
 st.subheader(f'Indicador de Ejecución de Gastos del mes de **{meses_nombres[parMes]}**')
 
@@ -145,6 +220,7 @@ st.write("---")
 
 # NUEVA SECCIÓN: Gastos por pagar hasta fin de mes actual
 st.subheader(f"📆 Gastos Pendientes Próximos Periodos por Pagar de {meses_nombres[parMes]} ")    
+st.warning("importante el detalle de los gastos pendientes para el próximo periodo siempre lo hace desde la fecha actual, en adelante si de decide cambiar el mes a desplegar, la proyeccion de gastos a pagar por semana o mensual no cambia")
 # Convertir 'fecha' a datetime
 dfDatos['fecha'] = pd.to_datetime(dfDatos['fecha'], errors='coerce')
 # Normalizamos campos clave
@@ -250,10 +326,13 @@ with c2:
 # se busca que el usuario realice los filtros de manera personalizada 
 st.write("---")
 
+st.warning("el item que sigue tiene distintas librerias como AgGrid, DataFrame, para generar distintos filtros de los datos para poder analisis la información en crudo")
+
+
 with st.expander("Datos con la opción de hacer filtros personalizados de la información "):
     @st.cache_data # Decorador para guardar en caché la función y evitar recargas innecesarias
     def cargarDatos():
-        dfDatos = pd.read_excel('datos/gastos.xlsx') # Leemos el archivo CSV desde una URL
+        dfDatos = pd.read_excel('datos/gastos.xlsx') 
         return dfDatos
 
     dfDatos=cargarDatos() # Llamamos a la función para cargar los datos
