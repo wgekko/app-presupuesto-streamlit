@@ -75,14 +75,14 @@ meses_nombres = {
 # Sidebar de filtros
 with st.sidebar:
     parMes = st.selectbox('Seleccione Mes Analizar', options=dfDatos['mes'].unique(), index=0, format_func=lambda x: meses_nombres[x])
-    parPais = st.multiselect('Selecciones Proyecto', options=dfDatos['proyecto'].unique())
+    parProyecto = st.multiselect('Selecciones Proyecto', options=dfDatos['proyecto'].unique())
 
 # Aplicar filtros
 dfDatos = dfDatos[dfDatos['anio'] == 2025]
 if parMes:
     dfDatos = dfDatos[dfDatos['mes'] <= parMes]
-if len(parPais) > 0:
-    dfDatos = dfDatos[dfDatos['proyecto'].isin(parPais)]
+if len(parProyecto) > 0:
+    dfDatos = dfDatos[dfDatos['proyecto'].isin(parProyecto)]
 
 # Datos del mes actual y anterior
 dfMesActual = dfDatos[dfDatos['mes'] == parMes]
