@@ -2,4 +2,4 @@ pandas
 streamlit
 plotly
 plotly.express 
-
+st_aggrid
