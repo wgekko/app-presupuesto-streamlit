@@ -10,9 +10,14 @@ link de Demo:
 https://app-presupuesto.streamlit.app/
 
 
-
+app original 
 https://github.com/user-attachments/assets/7548211b-4673-4bff-ad02-5952e2a4e57e
 
 
+app con las nuevas modificaciones
+
+
+
+https://github.com/user-attachments/assets/6e1a0cf3-cc2b-4b84-a334-88c5b3c65ed0
 
 
