@@ -3,3 +3,4 @@ streamlit
 plotly
 plotly.express 
 streamlit-aggrid
+ipyvizzu
